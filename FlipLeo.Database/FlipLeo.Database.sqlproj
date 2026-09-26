@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  SDK-style SQL Database Project (Microsoft.Build.Sql): the modern version of the
+  SSDT .sqlproj used by Pivotal.Database. Same idea and folder layout:
+    dbo\Tables\*.sql              the schema: one CREATE TABLE per file (the source of truth)
+    Script.PostDeployment.sql     runs after every publish (seed / lookup data)
+    PostDeployment\*.sql          files pulled into the post-deploy script with :r
+    ManualScripts\{yyyy-MM-dd}\   one-off change scripts (+ rollbacks) run by hand in SSMS
+  Builds with `dotnet build`, Visual Studio, or SSMS (Database DevOps).
+-->
+<Project DefaultTargets="Build">
+  <Sdk Name="Microsoft.Build.Sql" Version="1.0.0" />
+
+  <PropertyGroup>
+    <Name>FlipLeo.Database</Name>
+    <ProjectGuid>{5E3F9A2C-7B41-4D8E-9C16-2A7F0B83D5E4}</ProjectGuid>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql160DatabaseSchemaProvider</DSP>
+    <ModelCollation>1033, CI</ModelCollation>
+    <DefaultFileStructure>BySchemaAndSchemaType</DefaultFileStructure>
+    <TargetDatabaseSet>True</TargetDatabaseSet>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Post-deploy: runs after every publish -->
+    <Build Remove="Script.PostDeployment.sql" />
+    <PostDeploy Include="Script.PostDeployment.sql" />
+
+    <!-- Included by the post-deploy script via :r, so not part of the schema build -->
+    <Build Remove="PostDeployment\**\*.sql" />
+    <None Include="PostDeployment\**\*.sql" />
+
+    <!-- Manual scripts are run by hand, never deployed automatically -->
+    <Build Remove="ManualScripts\**\*.sql" />
+    <None Include="ManualScripts\**\*.sql" />
+  </ItemGroup>
+</Project>

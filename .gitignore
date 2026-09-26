@@ -1,0 +1,15 @@
+# Build output
+[Bb]in/
+[Oo]bj/
+
+# User / IDE files
+*.user
+*.suo
+*.rsuser
+*.dbmdl
+*.jfm
+.vs/
+.idea/
+
+# Publish profiles can contain connection strings / passwords
+*.publish.xml
