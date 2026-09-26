@@ -8,3 +8,5 @@ Post-Deployment Script
 */
 
 :r .\PostDeployment\Populate_LookupAuctionSite.sql
+
+:r .\PostDeployment\Populate_LookupFlipStatus.sql

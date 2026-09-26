@@ -1,6 +1,8 @@
 # FlipLeo.Database
 
-SQL Server schema for FlipLeo, set up the same way as `Pivotal.Database`.
+SQL Server schema for [Flipleo](https://flipleo.com), a profit tracker for resellers: people who buy items (often at online auctions), fix or upgrade them, and resell them. The database stores each user's tracked auctions, flips, add-ons and saved add-on presets.
+
+It's used by the [Flipleo API](../flipleo.API). The project is set up the same way as `Pivotal.Database` (SDK-style `.sqlproj`, `Microsoft.Build.Sql`).
 
 ## Layout
 
@@ -13,11 +15,18 @@ SQL Server schema for FlipLeo, set up the same way as `Pivotal.Database`.
 
 ## Tables
 
-- `UserAccount`: people who can log in (email + hashed password)
-- `LookupAuctionSite`: eBay, Goodwill, ... (seeded by post-deploy)
-- `Auction`: auctions a user is watching (owned by `UserId`)
-- `FlipRecord`: completed flips (owned by `UserId`, optional link to an `Auction`)
-- `FlipRecordAddOn`: parts bought for a flip (owned through its `FlipRecord`)
+| Table | Purpose | Owned by |
+|---|---|---|
+| `UserAccount` | People who can sign in (email, display name, PBKDF2 password hash) | (the owner) |
+| `UserAccountToken` | One-time emailed tokens, e.g. password reset. Stores only a SHA-256 hash | `UserAccountId` |
+| `Auction` | Auctions a user is watching: name, site, link, image, price, start/end, notes | `UserId` |
+| `FlipRecord` | Items bought to resell: image, buy/sell price, status, bought/sold dates, optional `AuctionId` | `UserId` |
+| `FlipRecordAddOn` | Parts/upgrades put into a flip (a copy of the preset's values when picked from one) | through its `FlipRecord` |
+| `AddOnPreset` | The user's saved "My Add-Ons" | `UserId` |
+| `LookupAuctionSite` | eBay, Goodwill, … (seeded by post-deploy) | shared |
+| `LookupFlipStatus` | 1 Bought, 2 Listed, 3 Sold (seeded by post-deploy; **never renumber**, the API uses these ids) | shared |
+
+Every business table has `IsActive` (soft delete) and the audit columns (`CreatedBy`, `CreatedByUsername`, `CreatedDate`, `UpdatedBy`, `UpdatedByUsername`, `UpdatedDate`). Parts price and profit are calculated by the API, never stored.
 
 ## Making a schema change
 
